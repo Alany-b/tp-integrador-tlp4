@@ -1,5 +1,10 @@
 import { DatabaseConnection } from './database/DatabaseConnection';
 import { initModels } from './database/InitModels';
+import { DatabaseSeeder } from './database/seed';
+import { BcryptPasswordHasher } from './modules/auth/BcryptPasswordHasher';
+import { PermissionRepository } from './modules/roles/PermissionRepository';
+import { RoleRepository } from './modules/roles/RoleRepository';
+import { UserRepository } from './modules/users/UserRepository';
 
 async function bootstrap(): Promise<void> {
   const db = DatabaseConnection.getInstance(); 
@@ -14,6 +19,18 @@ async function bootstrap(): Promise<void> {
 
    console.log('[DB] Modelos sincronizados');
 
+
+
+  const roleRepository = new RoleRepository();
+  const userRepository = new UserRepository();
+  const seeder = new DatabaseSeeder(
+    roleRepository,
+    new   PermissionRepository(),
+    userRepository,
+    new   BcryptPasswordHasher()
+  );
+  await seeder.run();
+  
 }
 
 // Si algo falla al arrancar, mostramos el error y salimos con código 1
