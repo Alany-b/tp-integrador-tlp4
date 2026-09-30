@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 export function RegisterPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -20,6 +21,10 @@ export function RegisterPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
 
+    if (name.trim() === "") {
+      setError("Ingresá tu nombre.");
+      return;
+    }
     if (email.trim() === "" || !email.includes("@")) {
       setError("Ingresá un correo electrónico válido.");
       return;
@@ -32,7 +37,7 @@ export function RegisterPage() {
     setError("");
     setSubmitting(true);
     try {
-      await register({ email: email.trim(), password });
+      await register({ name: name.trim(), email: email.trim(), password });
       navigate("/login");
     } catch (caught) {
       if (caught instanceof ApiError) {
@@ -58,6 +63,21 @@ export function RegisterPage() {
           )}
           <fieldset className="form__group">
             <legend className="visually-hidden">Datos de acceso</legend>
+            <div className="form__field">
+              <label className="form__label" htmlFor="register-name">
+                Nombre
+              </label>
+              <input
+                className="form__input"
+                id="register-name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+            </div>
             <div className="form__field">
               <label className="form__label" htmlFor="register-email">
                 Correo electrónico

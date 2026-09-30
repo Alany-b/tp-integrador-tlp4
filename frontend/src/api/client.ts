@@ -34,8 +34,8 @@ export function removeToken(): void {
 }
 
 function extractMessage(data: unknown): string | null {
-  if (typeof data === "object" && data !== null && "message" in data) {
-    const message: unknown = data.message;
+  if (typeof data === "object" && data !== null && "error" in data) {
+    const message: unknown = data.error;
     if (typeof message === "string" && message !== "") {
       return message;
     }

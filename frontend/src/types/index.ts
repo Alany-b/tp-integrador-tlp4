@@ -22,6 +22,7 @@ export const ROLES: Role[] = ["admin", "operador", "usuario"];
 
 export interface User {
   id: Id;
+  name: string;
   email: string;
   role: Role;
   permissions: Permission[];
@@ -66,6 +67,7 @@ export interface LoginBody {
 }
 
 export interface RegisterBody {
+  name: string;
   email: string;
   password: string;
 }
