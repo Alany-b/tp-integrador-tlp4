@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { UnauthorizedError } from '../../middlewares/AppError';
-import { ITokenService, TokenPayload } from './ITokenService';
+import { UnauthorizedError } from '../middlewares/AppError';
+import { ITokenService, TokenPayload } from '../modules/auth/ITokenService';
 
 export class JwtTokenService implements ITokenService {
   constructor(
