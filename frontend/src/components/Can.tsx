@@ -18,7 +18,7 @@ export function Can({ permission, children, mode = "hide", fallback = null }: Ca
 
   if (mode === "disable") {
     return (
-      <fieldset className="can" disabled>
+      <fieldset disabled>
         {children}
       </fieldset>
     );

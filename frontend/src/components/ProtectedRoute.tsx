@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router";
+import { Link, Navigate, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import type { Permission } from "../types";
 
@@ -10,7 +10,15 @@ export function ProtectedRoute({ permission }: ProtectedRouteProps) {
   const { user, loading, hasPermission } = useAuth();
 
   if (loading) {
-    return <p className="state state--loading">Cargando...</p>;
+    return (
+      <main className="page">
+        <div className="state state--loading" role="status">
+          <div className="state__spinner"></div>
+          <p className="state__title">Cargando</p>
+          <p className="state__text">Esto puede demorar unos segundos.</p>
+        </div>
+      </main>
+    );
   }
 
   if (user === null) {
@@ -18,7 +26,17 @@ export function ProtectedRoute({ permission }: ProtectedRouteProps) {
   }
 
   if (permission !== undefined && !hasPermission(permission)) {
-    return <p className="state state--denied">Acceso denegado</p>;
+    return (
+      <main className="page">
+        <div className="state state--denied" role="alert">
+          <p className="state__title">Acceso denegado</p>
+          <p className="state__text">No tenés permisos para ver esta sección.</p>
+          <div className="state__actions">
+            <Link className="btn btn--secondary btn--small" to="/tickets">Volver a tickets</Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return <Outlet />;
