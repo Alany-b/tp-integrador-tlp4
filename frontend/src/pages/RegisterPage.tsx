@@ -1,0 +1,105 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, Navigate, useNavigate } from "react-router";
+import { register } from "../api/auth.api";
+import { ApiError } from "../api/client";
+import { useAuth } from "../context/AuthContext";
+
+export function RegisterPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  if (user !== null) {
+    return <Navigate to="/tickets" replace />;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+
+    if (email.trim() === "" || !email.includes("@")) {
+      setError("Ingresá un correo electrónico válido.");
+      return;
+    }
+    if (password === "") {
+      setError("Ingresá la contraseña.");
+      return;
+    }
+
+    setError("");
+    setSubmitting(true);
+    try {
+      await register({ email: email.trim(), password });
+      navigate("/login");
+    } catch (caught) {
+      if (caught instanceof ApiError) {
+        setError(caught.message);
+      } else {
+        setError("Ocurrió un error inesperado.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="auth">
+      <section className="auth__card">
+        <span className="auth__brand">Mesa de Ayuda</span>
+        <h1 className="auth__title">Crear cuenta</h1>
+        <form className="form" onSubmit={handleSubmit}>
+          {error !== "" && (
+            <p className="form__error" role="alert">
+              {error}
+            </p>
+          )}
+          <fieldset className="form__group">
+            <legend className="visually-hidden">Datos de acceso</legend>
+            <div className="form__field">
+              <label className="form__label" htmlFor="register-email">
+                Correo electrónico
+              </label>
+              <input
+                className="form__input"
+                id="register-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="nombre@tp.com"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </div>
+            <div className="form__field">
+              <label className="form__label" htmlFor="register-password">
+                Contraseña
+              </label>
+              <input
+                className="form__input"
+                id="register-password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </div>
+          </fieldset>
+          <div className="form__actions">
+            <button className="btn btn--primary" type="submit" disabled={submitting}>
+              Crear cuenta
+            </button>
+          </div>
+        </form>
+        <p className="auth__footer">
+          ¿Ya tenés cuenta? <Link to="/login">Ingresar</Link>
+        </p>
+      </section>
+    </main>
+  );
+}
