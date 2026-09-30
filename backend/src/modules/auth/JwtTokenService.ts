@@ -1,5 +1,5 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { UnauthorizedError } from '../middlewares/AppError';
+import { UnauthorizedError } from '../../middlewares/AppError';
 import { ITokenService, TokenPayload } from './ITokenService';
 
 export class JwtTokenService implements ITokenService {

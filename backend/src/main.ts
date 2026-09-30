@@ -1,8 +1,8 @@
 import { createApp } from './app';
-import { AuthController } from './auth/AuthController';
-import { AuthService } from './auth/AuthService';
-import { createAuthRouter } from './auth/auth.routes';
-import { JwtTokenService } from './auth/JwtTokenService';
+import { AuthController } from './modules/auth/AuthController';
+import { AuthService } from './modules/auth/AuthService';
+import { createAuthRouter } from './modules/auth/auth.routes';
+import { JwtTokenService } from './modules/auth/JwtTokenService';
 import { env } from './config/env';
 import { DatabaseConnection } from './database/DatabaseConnection';
 import { initModels } from './database/InitModels';

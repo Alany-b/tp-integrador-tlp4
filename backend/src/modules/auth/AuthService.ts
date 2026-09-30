@@ -1,9 +1,9 @@
-import { ConflictError, UnauthorizedError } from '../middlewares/AppError';
-import { IPasswordHasher } from '../modules/auth/IPasswordHasher';
-import { IRoleRepository } from '../modules/roles/IRoleRepository';
-import { ROLES } from '../modules/roles/permissions';
-import { User } from '../modules/users/User';
-import { IUserRepository } from '../modules/users/IUserRepository';
+import { ConflictError, UnauthorizedError } from '../../middlewares/AppError';
+import { IPasswordHasher } from './IPasswordHasher';
+import { IRoleRepository } from '../roles/IRoleRepository';
+import { ROLES } from '../roles/permissions';
+import { User } from '../users/User';
+import { IUserRepository } from '../users/IUserRepository';
 import { AuthResult, LoginInput, RegisterInput } from './auth.types';
 import { ITokenService } from './ITokenService';
 
