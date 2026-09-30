@@ -1,3 +1,9 @@
+import { createApp } from './app';
+import { AuthController } from './auth/AuthController';
+import { AuthService } from './auth/AuthService';
+import { createAuthRouter } from './auth/auth.routes';
+import { JwtTokenService } from './auth/JwtTokenService';
+import { env } from './config/env';
 import { DatabaseConnection } from './database/DatabaseConnection';
 import { initModels } from './database/InitModels';
 import { DatabaseSeeder } from './database/seed';
@@ -7,33 +13,35 @@ import { RoleRepository } from './modules/roles/RoleRepository';
 import { UserRepository } from './modules/users/UserRepository';
 
 async function bootstrap(): Promise<void> {
-  const db = DatabaseConnection.getInstance(); 
-  await db.connect();     
-  
-  initModels(db.getSequelize( ) ); // Inicializamos los modelos con la instancia de Sequelize
+  const db = DatabaseConnection.getInstance();
+  await db.connect();
 
-  await db.connect(); 
-
-  initModels(db.getSequelize());     
+  initModels(db.getSequelize());
   await db.getSequelize().sync();
-
-   console.log('[DB] Modelos sincronizados');
-
-
+  console.log('[DB] Modelos sincronizados');
 
   const roleRepository = new RoleRepository();
   const userRepository = new UserRepository();
+  const passwordHasher = new BcryptPasswordHasher();
+  const tokenService = new JwtTokenService(env.jwtSecret);
+
   const seeder = new DatabaseSeeder(
     roleRepository,
-    new   PermissionRepository(),
+    new PermissionRepository(),
     userRepository,
-    new   BcryptPasswordHasher()
+    passwordHasher
   );
   await seeder.run();
-  
+
+  const authService = new AuthService(userRepository, roleRepository, passwordHasher, tokenService);
+  const authController = new AuthController(authService);
+  const app = createApp(createAuthRouter(authController));
+
+  app.listen(env.apiPort, () => {
+    console.log(`[API] Escuchando en http://localhost:${env.apiPort}`);
+  });
 }
 
-// Si algo falla al arrancar, mostramos el error y salimos con código 1
 bootstrap().catch((error: unknown) => {
   console.error('Error al iniciar:', error);
   process.exit(1);
