@@ -2,12 +2,14 @@ import { Sequelize } from 'sequelize';
 import { Permission, initPermissionModel } from '../modules/roles/Permission';
 import { Role, initRoleModel } from '../modules/roles/Role';
 import { User, initUserModel } from '../modules/users/User';
+import { initEventModel } from '../modules/events/Event';
 
 export function initModels(sequelize: Sequelize): void {
   // 1) Primero se inicializan todos los modelos con la instancia única de Sequelize
   initPermissionModel(sequelize);
   initRoleModel(sequelize);
   initUserModel(sequelize);
+  initEventModel(sequelize);
 
   // 2) Después se declaran las asociaciones
   // Rol <-> Permiso: muchos a muchos, con la tabla intermedia role_permissions

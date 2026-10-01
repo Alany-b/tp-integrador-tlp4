@@ -20,6 +20,14 @@ import { UserController } from './modules/users/UserController';
 import { UserService } from './modules/users/UserService';
 import { createUserRouter } from './modules/users/user.routes';
 
+import { EventRepository } from './modules/events/EventRepository';
+import { EventService } from './modules/events/EventService';
+import { EventController } from './modules/events/EventController';
+import { createEventRouter } from './modules/events/event.routes';
+import { EventPublisher } from './observer/EventPublisher';
+import { NotifierFactory } from './modules/notifications/NotifierFactory';
+import { NotificationService } from './modules/notifications/NotificationService';
+
 async function bootstrap(): Promise<void> {
   const db = DatabaseConnection.getInstance();
   await db.connect();
@@ -49,11 +57,21 @@ const authController = new AuthController(authService);
 const userService = new UserService(userRepository, roleRepository);
 const userController = new UserController(userService);
 
+// Instanciar dependencias de eventos y notificaciones
+const notifierFactory = new NotifierFactory();
+const notificationService = new NotificationService(notifierFactory);
+
+const eventPublisher = new EventPublisher();
+eventPublisher.attach(notificationService);
+
+const eventRepository = new EventRepository();
+const eventService = new EventService(eventRepository, eventPublisher);
+const eventController = new EventController(eventService);
 
   const app = createApp({
     auth: createAuthRouter(authController),
     users: createUserRouter(userController, authenticate), 
-    events: Router(),
+    events: createEventRouter(eventController, authenticate),
   });
 
   app.listen(env.apiPort, () => {
