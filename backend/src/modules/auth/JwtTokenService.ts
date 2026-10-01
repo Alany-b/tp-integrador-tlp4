@@ -1,5 +1,5 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { UnauthorizedError } from '../middlewares/AppError';
+import { UnauthorizedError } from '../../middlewares/AppError';
 import { ITokenService, TokenPayload } from './ITokenService';
 
 export class JwtTokenService implements ITokenService {
@@ -9,11 +9,13 @@ export class JwtTokenService implements ITokenService {
   ) {}
 
   sign(payload: TokenPayload): string {
-    return jwt.sign({ userId: payload.userId }, this.secret, { expiresIn: this.expiresInSeconds });
+    return jwt.sign({ userId: payload.userId , roleId: payload.roleId }, this.secret, { expiresIn: this.expiresInSeconds });
   }
 
   verify(token: string): TokenPayload {
-    let decoded: string | JwtPayload;
+    console.log("Token exacto:", token);
+    console.log("Mi secret es:", this.secret);
+    let decoded: any;
     try {
       decoded = jwt.verify(token, this.secret); // lanza si la firma es falsa o el token venció
     } catch {
@@ -23,6 +25,6 @@ export class JwtTokenService implements ITokenService {
     if (typeof decoded === 'string' || typeof decoded.userId !== 'number') {
       throw new UnauthorizedError('Token inválido');
     }
-    return { userId: decoded.userId };
+    return { userId: decoded.userId , roleId: decoded.roleId };
   }
 }

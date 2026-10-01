@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { ValidationError } from '../middlewares/AppError';
-import { readEmail, readString } from '../middlewares/validators';
+import { ValidationError } from '../../middlewares/AppError';
+import { readEmail, readString } from '../../middlewares/validators';
 import { AuthService } from './AuthService';
 
 const MIN_PASSWORD_LENGTH = 6;
