@@ -22,6 +22,11 @@ export class EventService {
   }
 
   async changeStatus(id: number, newStatus: string) {
+    const validStatuses = ['PROGRAMADO', 'REPROGRAMADO', 'CANCELADO', 'FINALIZADO'];
+    if (!validStatuses.includes(newStatus)) {
+      throw new Error(`Estado inválido. Los estados permitidos son: ${validStatuses.join(', ')}`);
+    }
+
     const oldEvent = await this.getById(id);
     const oldStatus = oldEvent.status;
 
