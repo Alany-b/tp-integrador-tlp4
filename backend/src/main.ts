@@ -7,8 +7,6 @@ import { JwtTokenService } from './auth/JwtTokenService';
 import { env } from './config/env';
 import { DatabaseConnection } from './database/DatabaseConnection';
 
-
-
 import { initModels } from './database/InitModels';
 import { DatabaseSeeder } from './database/seed';
 import { BcryptPasswordHasher } from './modules/auth/BcryptPasswordHasher';
@@ -43,25 +41,26 @@ async function bootstrap(): Promise<void> {
   );
   await seeder.run();
 
-  const authenticate = createAuthenticate(tokenService, userRepository);
-  const authService = new AuthService(userRepository, roleRepository, passwordHasher, tokenService);
-  const authController = new AuthController(authService);
-  const userService = new UserService(userRepository, roleRepository);
+const authenticate = createAuthenticate(tokenService, userRepository); // se comparte con todos los routers
+
+const authService = new AuthService(userRepository, roleRepository, passwordHasher, tokenService);
+const authController = new AuthController(authService);
+
+const userService = new UserService(userRepository, roleRepository);
 const userController = new UserController(userService);
- 
-const app = createApp({
-  auth: createAuthRouter(authController),
-  users: createUserRouter(userController, authenticate),
-  
-});
 
-app.listen(env.apiPort, () => {
-  console.log(`[API] Escuchando en http://localhost:${env.apiPort}`);
 
+  const app = createApp({
+    auth: createAuthRouter(authController),
+    users: Router(),
+    events: Router(),
   });
 
+  app.listen(env.apiPort, () => {
+    console.log(`[API] Escuchando en http://localhost:${env.apiPort}`);
+  });
+}
 
-  }
 bootstrap().catch((error: unknown) => {
   console.error('Error al iniciar:', error);
   process.exit(1);
