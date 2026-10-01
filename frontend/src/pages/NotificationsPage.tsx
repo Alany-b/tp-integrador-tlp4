@@ -116,7 +116,7 @@ export function NotificationsPage() {
       {!loading && error === "" && notifications.length === 0 && (
         <div className="state state--empty" role="status">
           <p className="state__title">Todavía no hay notificaciones</p>
-          <p className="state__text">Cuando cambie el estado de un ticket suscripto, aparecerá en este listado.</p>
+          <p className="state__text">Cuando cambie el estado de un evento suscripto, aparecerá en este listado.</p>
         </div>
       )}
 

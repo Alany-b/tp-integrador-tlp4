@@ -23,9 +23,9 @@ export function Navbar() {
 
   return (
     <nav className="navbar" aria-label="Principal">
-      <Link className="navbar__brand" to="/tickets">Mesa de Ayuda</Link>
+      <Link className="navbar__brand" to="/events">Mesa de Ayuda</Link>
       <div className="navbar__links">
-        <NavLink className={getLinkClassName} to="/tickets">Tickets</NavLink>
+        <NavLink className={getLinkClassName} to="/events">Eventos</NavLink>
         <Can permission="user:read">
           <NavLink className={getLinkClassName} to="/admin/users">Usuarios</NavLink>
         </Can>

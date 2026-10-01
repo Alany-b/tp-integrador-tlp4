@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { listTickets } from "../api/tickets.api";
+import { listEvents } from "../api/events.api";
 import { ApiError } from "../api/client";
 import { Can } from "../components/Can";
-import type { Ticket, TicketStatus } from "../types";
+import type { Event, EventStatus } from "../types";
 
-function getBadgeClassName(status: TicketStatus): string {
-  if (status === "ABIERTO") {
-    return "badge badge--abierto";
+function getBadgeClassName(status: EventStatus): string {
+  if (status === "PROGRAMADO") {
+    return "badge badge--programado";
   }
-  if (status === "EN_PROGRESO") {
-    return "badge badge--en-progreso";
+  if (status === "REPROGRAMADO") {
+    return "badge badge--reprogramado";
   }
-  if (status === "RESUELTO") {
-    return "badge badge--resuelto";
+  if (status === "FINALIZADO") {
+    return "badge badge--finalizado";
   }
-  return "badge badge--cerrado";
+  return "badge badge--cancelado";
 }
 
 function formatDate(isoDate: string): string {
@@ -32,17 +32,17 @@ function formatDate(isoDate: string): string {
     .replace(",", "");
 }
 
-export function TicketListPage() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+export function EventListPage() {
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  async function loadTickets(): Promise<void> {
+  async function loadEvents(): Promise<void> {
     setLoading(true);
     setError("");
     try {
-      const data = await listTickets();
-      setTickets(data);
+      const data = await listEvents();
+      setEvents(data);
     } catch (caught) {
       if (caught instanceof ApiError) {
         setError(caught.message);
@@ -55,17 +55,17 @@ export function TicketListPage() {
   }
 
   useEffect(() => {
-    loadTickets();
+    loadEvents();
   }, []);
 
   return (
     <main className="page">
       <header className="page__header">
-        <h1 className="page__title">Tickets</h1>
+        <h1 className="page__title">Eventos</h1>
         <div className="page__actions">
-          <Can permission="ticket:create">
-            <Link className="btn btn--primary" to="/tickets/new">
-              Nuevo ticket
+          <Can permission="event:create">
+            <Link className="btn btn--primary" to="/events/new">
+              Nuevo evento
             </Link>
           </Can>
         </div>
@@ -74,34 +74,34 @@ export function TicketListPage() {
       {loading && (
         <div className="state state--loading" role="status">
           <div className="state__spinner"></div>
-          <p className="state__title">Cargando tickets</p>
+          <p className="state__title">Cargando eventos</p>
           <p className="state__text">Esto puede demorar unos segundos.</p>
         </div>
       )}
 
       {!loading && error !== "" && (
         <div className="state state--error" role="alert">
-          <p className="state__title">No se pudieron cargar los tickets</p>
+          <p className="state__title">No se pudieron cargar los eventos</p>
           <p className="state__text">{error}</p>
           <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadTickets}>
+            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvents}>
               Reintentar
             </button>
           </div>
         </div>
       )}
 
-      {!loading && error === "" && tickets.length === 0 && (
+      {!loading && error === "" && events.length === 0 && (
         <div className="state state--empty" role="status">
-          <p className="state__title">Todavía no hay tickets</p>
-          <p className="state__text">Cuando se cree un ticket, aparecerá en este listado.</p>
+          <p className="state__title">Todavía no hay eventos</p>
+          <p className="state__text">Cuando se cree un evento, aparecerá en este listado.</p>
         </div>
       )}
 
-      {!loading && error === "" && tickets.length > 0 && (
+      {!loading && error === "" && events.length > 0 && (
         <div className="table-wrapper">
           <table className="table">
-            <caption className="visually-hidden">Listado de tickets</caption>
+            <caption className="visually-hidden">Listado de eventos</caption>
             <thead>
               <tr className="table__row">
                 <th className="table__cell table__cell--head" scope="col">Id</th>
@@ -114,18 +114,18 @@ export function TicketListPage() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket) => (
-                <tr className="table__row" key={ticket.id}>
-                  <td className="table__cell table__cell--id">#{ticket.id}</td>
-                  <td className="table__cell">{ticket.title}</td>
+              {events.map((event) => (
+                <tr className="table__row" key={event.id}>
+                  <td className="table__cell table__cell--id">#{event.id}</td>
+                  <td className="table__cell">{event.title}</td>
                   <td className="table__cell">
-                    <span className={getBadgeClassName(ticket.status)}>{ticket.status}</span>
+                    <span className={getBadgeClassName(event.status)}>{event.status}</span>
                   </td>
                   <td className="table__cell table__cell--date">
-                    <time dateTime={ticket.updatedAt}>{formatDate(ticket.updatedAt)}</time>
+                    <time dateTime={event.updatedAt}>{formatDate(event.updatedAt)}</time>
                   </td>
                   <td className="table__cell table__cell--actions">
-                    <Link to={`/tickets/${ticket.id}`}>Ver detalle</Link>
+                    <Link to={`/events/${event.id}`}>Ver detalle</Link>
                   </td>
                 </tr>
               ))}

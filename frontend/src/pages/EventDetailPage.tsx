@@ -2,28 +2,28 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import {
-  changeTicketStatus,
-  deleteTicket,
-  getTicket,
-  subscribeToTicket,
-  unsubscribeFromTicket,
-} from "../api/tickets.api";
+  changeEventStatus,
+  deleteEvent,
+  getEvent,
+  subscribeToEvent,
+  unsubscribeFromEvent,
+} from "../api/events.api";
 import { ApiError } from "../api/client";
 import { Can } from "../components/Can";
-import { TICKET_STATUSES } from "../types";
-import type { TicketDetail, TicketStatus } from "../types";
+import { EVENT_STATUSES } from "../types";
+import type { EventDetail, EventStatus } from "../types";
 
-function getBadgeClassName(status: TicketStatus): string {
-  if (status === "ABIERTO") {
-    return "badge badge--abierto";
+function getBadgeClassName(status: EventStatus): string {
+  if (status === "PROGRAMADO") {
+    return "badge badge--programado";
   }
-  if (status === "EN_PROGRESO") {
-    return "badge badge--en-progreso";
+  if (status === "REPROGRAMADO") {
+    return "badge badge--reprogramado";
   }
-  if (status === "RESUELTO") {
-    return "badge badge--resuelto";
+  if (status === "FINALIZADO") {
+    return "badge badge--finalizado";
   }
-  return "badge badge--cerrado";
+  return "badge badge--cancelado";
 }
 
 function formatDate(isoDate: string): string {
@@ -47,26 +47,26 @@ function getErrorMessage(caught: unknown): string {
   return "Ocurrió un error inesperado.";
 }
 
-export function TicketDetailPage() {
+export function EventDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [ticket, setTicket] = useState<TicketDetail | null>(null);
-  const [statusSelection, setStatusSelection] = useState<TicketStatus>("ABIERTO");
+  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [statusSelection, setStatusSelection] = useState<EventStatus>("PROGRAMADO");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [actionError, setActionError] = useState<string>("");
 
-  async function loadTicket(): Promise<void> {
+  async function loadEvent(): Promise<void> {
     if (id === undefined) {
-      setError("El ticket solicitado no existe.");
+      setError("El evento solicitado no existe.");
       setLoading(false);
       return;
     }
     setLoading(true);
     setError("");
     try {
-      const data = await getTicket(id);
-      setTicket(data);
+      const data = await getEvent(id);
+      setEvent(data);
       setStatusSelection(data.status);
     } catch (caught) {
       setError(getErrorMessage(caught));
@@ -76,63 +76,63 @@ export function TicketDetailPage() {
   }
 
   useEffect(() => {
-    loadTicket();
+    loadEvent();
   }, [id]);
 
-  async function handleSubscribe(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    if (ticket === null) {
+  async function handleSubscribe(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
+    submitEvent.preventDefault();
+    if (event === null) {
       return;
     }
     setActionError("");
     try {
-      await subscribeToTicket(ticket.id);
-      setTicket({ ...ticket, isSubscribed: true });
+      await subscribeToEvent(event.id);
+      setEvent({ ...event, isSubscribed: true });
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
   }
 
-  async function handleUnsubscribe(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    if (ticket === null) {
+  async function handleUnsubscribe(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
+    submitEvent.preventDefault();
+    if (event === null) {
       return;
     }
     setActionError("");
     try {
-      await unsubscribeFromTicket(ticket.id);
-      setTicket({ ...ticket, isSubscribed: false });
+      await unsubscribeFromEvent(event.id);
+      setEvent({ ...event, isSubscribed: false });
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
   }
 
-  async function handleChangeStatus(event: FormEvent<HTMLFormElement>): Promise<void> {
-    event.preventDefault();
-    if (ticket === null) {
+  async function handleChangeStatus(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
+    submitEvent.preventDefault();
+    if (event === null) {
       return;
     }
     setActionError("");
     try {
-      const updated = await changeTicketStatus(ticket.id, { status: statusSelection });
-      setTicket({ ...ticket, status: updated.status, updatedAt: updated.updatedAt });
+      const updated = await changeEventStatus(event.id, { status: statusSelection });
+      setEvent({ ...event, status: updated.status, updatedAt: updated.updatedAt });
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
   }
 
   async function handleDelete(): Promise<void> {
-    if (ticket === null) {
+    if (event === null) {
       return;
     }
-    const confirmed = window.confirm("¿Seguro que querés eliminar este ticket?");
+    const confirmed = window.confirm("¿Seguro que querés eliminar este evento?");
     if (!confirmed) {
       return;
     }
     setActionError("");
     try {
-      await deleteTicket(ticket.id);
-      navigate("/tickets");
+      await deleteEvent(event.id);
+      navigate("/events");
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
@@ -141,9 +141,9 @@ export function TicketDetailPage() {
   return (
     <main className="page">
       <header className="page__header">
-        <h1 className="page__title">{ticket !== null ? `Ticket #${ticket.id}` : "Detalle del ticket"}</h1>
+        <h1 className="page__title">{event !== null ? `Evento #${event.id}` : "Detalle del evento"}</h1>
         <div className="page__actions">
-          <Link className="btn btn--secondary" to="/tickets">
+          <Link className="btn btn--secondary" to="/events">
             Volver al listado
           </Link>
         </div>
@@ -152,52 +152,52 @@ export function TicketDetailPage() {
       {loading && (
         <div className="state state--loading" role="status">
           <div className="state__spinner"></div>
-          <p className="state__title">Cargando ticket</p>
+          <p className="state__title">Cargando evento</p>
           <p className="state__text">Esto puede demorar unos segundos.</p>
         </div>
       )}
 
       {!loading && error !== "" && (
         <div className="state state--error" role="alert">
-          <p className="state__title">No se pudo cargar el ticket</p>
+          <p className="state__title">No se pudo cargar el evento</p>
           <p className="state__text">{error}</p>
           <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadTicket}>
+            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvent}>
               Reintentar
             </button>
           </div>
         </div>
       )}
 
-      {!loading && error === "" && ticket !== null && (
-        <article className="card ticket-detail">
-          <div className="ticket-detail__header">
-            <h2>{ticket.title}</h2>
-            <span className={getBadgeClassName(ticket.status)}>{ticket.status}</span>
+      {!loading && error === "" && event !== null && (
+        <article className="card event-detail">
+          <div className="event-detail__header">
+            <h2>{event.title}</h2>
+            <span className={getBadgeClassName(event.status)}>{event.status}</span>
           </div>
-          <dl className="ticket-detail__meta">
+          <dl className="event-detail__meta">
             <div>
-              <dt className="ticket-detail__term">Creado</dt>
-              <dd className="ticket-detail__value">
-                <time dateTime={ticket.createdAt}>{formatDate(ticket.createdAt)}</time>
+              <dt className="event-detail__term">Creado</dt>
+              <dd className="event-detail__value">
+                <time dateTime={event.createdAt}>{formatDate(event.createdAt)}</time>
               </dd>
             </div>
             <div>
-              <dt className="ticket-detail__term">Actualizado</dt>
-              <dd className="ticket-detail__value">
-                <time dateTime={ticket.updatedAt}>{formatDate(ticket.updatedAt)}</time>
+              <dt className="event-detail__term">Actualizado</dt>
+              <dd className="event-detail__value">
+                <time dateTime={event.updatedAt}>{formatDate(event.updatedAt)}</time>
               </dd>
             </div>
           </dl>
-          <p className="ticket-detail__description">{ticket.description}</p>
+          <p className="event-detail__description">{event.description}</p>
           {actionError !== "" && (
             <p className="form__error" role="alert">
               {actionError}
             </p>
           )}
-          <div className="ticket-detail__actions">
-            <div className="ticket-detail__group">
-              {!ticket.isSubscribed && (
+          <div className="event-detail__actions">
+            <div className="event-detail__group">
+              {!event.isSubscribed && (
                 <Can permission="subscription:create">
                   <form onSubmit={handleSubscribe}>
                     <button className="btn btn--primary" type="submit">
@@ -206,7 +206,7 @@ export function TicketDetailPage() {
                   </form>
                 </Can>
               )}
-              {ticket.isSubscribed && (
+              {event.isSubscribed && (
                 <Can permission="subscription:delete">
                   <form onSubmit={handleUnsubscribe}>
                     <button className="btn btn--secondary" type="submit">
@@ -216,26 +216,26 @@ export function TicketDetailPage() {
                 </Can>
               )}
             </div>
-            <Can permission="ticket:change-status">
-              <form className="ticket-detail__group" onSubmit={handleChangeStatus}>
-                <fieldset className="ticket-detail__group">
+            <Can permission="event:change-status">
+              <form className="event-detail__group" onSubmit={handleChangeStatus}>
+                <fieldset className="event-detail__group">
                   <legend className="visually-hidden">Cambiar estado</legend>
-                  <label className="form__label" htmlFor="ticket-status">
+                  <label className="form__label" htmlFor="event-status">
                     Estado
                   </label>
                   <select
                     className="form__select form__select--inline"
-                    id="ticket-status"
+                    id="event-status"
                     name="status"
                     value={statusSelection}
                     onChange={(event) => {
-                      const selected = TICKET_STATUSES.find((status) => status === event.target.value);
+                      const selected = EVENT_STATUSES.find((status) => status === event.target.value);
                       if (selected !== undefined) {
                         setStatusSelection(selected);
                       }
                     }}
                   >
-                    {TICKET_STATUSES.map((status) => (
+                    {EVENT_STATUSES.map((status) => (
                       <option key={status} value={status}>
                         {status}
                       </option>
@@ -247,13 +247,13 @@ export function TicketDetailPage() {
                 </fieldset>
               </form>
             </Can>
-            <div className="ticket-detail__group">
-              <Can permission="ticket:update">
-                <Link className="btn btn--secondary" to={`/tickets/${ticket.id}/edit`}>
+            <div className="event-detail__group">
+              <Can permission="event:update">
+                <Link className="btn btn--secondary" to={`/events/${event.id}/edit`}>
                   Editar
                 </Link>
               </Can>
-              <Can permission="ticket:delete">
+              <Can permission="event:delete">
                 <button className="btn btn--danger" type="button" onClick={handleDelete}>
                   Eliminar
                 </button>

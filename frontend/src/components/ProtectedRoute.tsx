@@ -32,7 +32,7 @@ export function ProtectedRoute({ permission }: ProtectedRouteProps) {
           <p className="state__title">Acceso denegado</p>
           <p className="state__text">No tenés permisos para ver esta sección.</p>
           <div className="state__actions">
-            <Link className="btn btn--secondary btn--small" to="/tickets">Volver a tickets</Link>
+            <Link className="btn btn--secondary btn--small" to="/events">Volver a eventos</Link>
           </div>
         </div>
       </main>

@@ -476,23 +476,23 @@ fieldset:disabled .form__textarea {
   white-space: nowrap;
 }
 
-.badge--abierto {
+.badge--programado {
   background: var(--color-accent-tint);
   border-color: var(--color-accent);
   color: var(--color-accent-dark);
 }
 
-.badge--en-progreso {
+.badge--reprogramado {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
-.badge--resuelto {
+.badge--finalizado {
   background: var(--color-text);
   color: var(--color-surface);
 }
 
-.badge--cerrado {
+.badge--cancelado {
   background: var(--color-neutral-tint);
   border-color: var(--color-border);
   color: var(--color-muted);
@@ -588,20 +588,20 @@ fieldset:disabled .form__textarea {
   color: var(--color-muted);
 }
 
-.ticket-detail {
+.event-detail {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-.ticket-detail__header {
+.event-detail__header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
 }
 
-.ticket-detail__meta {
+.event-detail__meta {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-4);
@@ -611,7 +611,7 @@ fieldset:disabled .form__textarea {
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.ticket-detail__term {
+.event-detail__term {
   font-size: var(--font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
@@ -619,11 +619,11 @@ fieldset:disabled .form__textarea {
   color: var(--color-muted);
 }
 
-.ticket-detail__value { margin: var(--space-1) 0 0; }
+.event-detail__value { margin: var(--space-1) 0 0; }
 
-.ticket-detail__description { max-width: 46rem; }
+.event-detail__description { max-width: 46rem; }
 
-.ticket-detail__actions {
+.event-detail__actions {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -631,7 +631,7 @@ fieldset:disabled .form__textarea {
   border-top: var(--rule-width) solid var(--color-rule);
 }
 
-.ticket-detail__group {
+.event-detail__group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -698,9 +698,9 @@ fieldset:disabled .form__textarea {
     justify-content: space-between;
   }
 
-  .ticket-detail__meta { grid-template-columns: repeat(2, 1fr); }
+  .event-detail__meta { grid-template-columns: repeat(2, 1fr); }
 
-  .ticket-detail__actions {
+  .event-detail__actions {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;

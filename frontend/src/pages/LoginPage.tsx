@@ -13,7 +13,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   if (user !== null) {
-    return <Navigate to="/tickets" replace />;
+    return <Navigate to="/events" replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -32,7 +32,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email.trim(), password);
-      navigate("/tickets");
+      navigate("/events");
     } catch (caught) {
       if (caught instanceof ApiError) {
         setError(caught.message);

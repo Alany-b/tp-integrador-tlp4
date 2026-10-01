@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { createTicket, getTicket, updateTicket } from "../api/tickets.api";
+import { createEvent, getEvent, updateEvent } from "../api/events.api";
 import { ApiError } from "../api/client";
 
 function getErrorMessage(caught: unknown): string {
@@ -11,7 +11,7 @@ function getErrorMessage(caught: unknown): string {
   return "Ocurrió un error inesperado.";
 }
 
-export function TicketFormPage() {
+export function EventFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = id !== undefined;
@@ -22,16 +22,16 @@ export function TicketFormPage() {
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  async function loadTicket(): Promise<void> {
+  async function loadEvent(): Promise<void> {
     if (id === undefined) {
       return;
     }
     setLoading(true);
     setLoadError("");
     try {
-      const ticket = await getTicket(id);
-      setTitle(ticket.title);
-      setDescription(ticket.description);
+      const event = await getEvent(id);
+      setTitle(event.title);
+      setDescription(event.description);
     } catch (caught) {
       setLoadError(getErrorMessage(caught));
     } finally {
@@ -40,7 +40,7 @@ export function TicketFormPage() {
   }
 
   useEffect(() => {
-    loadTicket();
+    loadEvent();
   }, [id]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -60,11 +60,11 @@ export function TicketFormPage() {
     try {
       const body = { title: title.trim(), description: description.trim() };
       if (id === undefined) {
-        await createTicket(body);
+        await createEvent(body);
       } else {
-        await updateTicket(id, body);
+        await updateEvent(id, body);
       }
-      navigate("/tickets");
+      navigate("/events");
     } catch (caught) {
       setError(getErrorMessage(caught));
     } finally {
@@ -73,28 +73,28 @@ export function TicketFormPage() {
   }
 
   const prefix = isEditing ? "edit" : "new";
-  const cancelPath = isEditing ? `/tickets/${id}` : "/tickets";
+  const cancelPath = isEditing ? `/events/${id}` : "/events";
 
   return (
     <main className="page">
       <header className="page__header">
-        <h1 className="page__title">{isEditing ? "Editar ticket" : "Nuevo ticket"}</h1>
+        <h1 className="page__title">{isEditing ? "Editar evento" : "Nuevo evento"}</h1>
       </header>
 
       {loading && (
         <div className="state state--loading" role="status">
           <div className="state__spinner"></div>
-          <p className="state__title">Cargando ticket</p>
+          <p className="state__title">Cargando evento</p>
           <p className="state__text">Esto puede demorar unos segundos.</p>
         </div>
       )}
 
       {!loading && loadError !== "" && (
         <div className="state state--error" role="alert">
-          <p className="state__title">No se pudo cargar el ticket</p>
+          <p className="state__title">No se pudo cargar el evento</p>
           <p className="state__text">{loadError}</p>
           <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadTicket}>
+            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvent}>
               Reintentar
             </button>
           </div>
@@ -110,7 +110,7 @@ export function TicketFormPage() {
               </p>
             )}
             <fieldset className="form__group">
-              <legend className="form__legend">Datos del ticket</legend>
+              <legend className="form__legend">Datos del evento</legend>
               <div className="form__field">
                 <label className="form__label" htmlFor={`${prefix}-title`}>
                   Título
@@ -120,7 +120,7 @@ export function TicketFormPage() {
                   id={`${prefix}-title`}
                   name="title"
                   type="text"
-                  placeholder={isEditing ? undefined : "Resumen breve del problema"}
+                  placeholder={isEditing ? undefined : "Nombre del evento"}
                   required
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
@@ -135,7 +135,7 @@ export function TicketFormPage() {
                   id={`${prefix}-description`}
                   name="description"
                   rows={6}
-                  placeholder={isEditing ? undefined : "Describí el problema con el mayor detalle posible"}
+                  placeholder={isEditing ? undefined : "Describí el evento con el mayor detalle posible"}
                   required
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}

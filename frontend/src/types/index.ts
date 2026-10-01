@@ -3,20 +3,20 @@ export type Id = number | string;
 export type Role = "admin" | "operador" | "usuario";
 
 export type Permission =
-  | "ticket:read"
-  | "ticket:create"
-  | "ticket:update"
-  | "ticket:change-status"
-  | "ticket:delete"
+  | "event:read"
+  | "event:create"
+  | "event:update"
+  | "event:change-status"
+  | "event:delete"
   | "subscription:create"
   | "subscription:delete"
   | "notification:read"
   | "user:read"
   | "user:assign-role";
 
-export type TicketStatus = "ABIERTO" | "EN_PROGRESO" | "RESUELTO" | "CERRADO";
+export type EventStatus = "PROGRAMADO" | "REPROGRAMADO" | "CANCELADO" | "FINALIZADO";
 
-export const TICKET_STATUSES: TicketStatus[] = ["ABIERTO", "EN_PROGRESO", "RESUELTO", "CERRADO"];
+export const EVENT_STATUSES: EventStatus[] = ["PROGRAMADO", "REPROGRAMADO", "CANCELADO", "FINALIZADO"];
 
 export const ROLES: Role[] = ["admin", "operador", "usuario"];
 
@@ -33,29 +33,29 @@ export interface AuthResponse {
   user: User;
 }
 
-export interface Ticket {
+export interface Event {
   id: Id;
   title: string;
   description: string;
-  status: TicketStatus;
+  status: EventStatus;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface TicketDetail extends Ticket {
+export interface EventDetail extends Event {
   isSubscribed: boolean;
 }
 
 export interface Subscription {
   id: Id;
   userId: Id;
-  ticketId: Id;
+  eventId: Id;
   createdAt: string;
 }
 
 export interface Notification {
   id: Id;
-  ticketId: Id;
+  eventId: Id;
   message: string;
   read: boolean;
   createdAt: string;
@@ -72,13 +72,13 @@ export interface RegisterBody {
   password: string;
 }
 
-export interface TicketBody {
+export interface EventBody {
   title: string;
   description: string;
 }
 
-export interface TicketStatusBody {
-  status: TicketStatus;
+export interface EventStatusBody {
+  status: EventStatus;
 }
 
 export interface UserRoleBody {
