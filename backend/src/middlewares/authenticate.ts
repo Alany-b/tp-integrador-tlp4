@@ -13,8 +13,12 @@ export function createAuthenticate(tokens: ITokenService, users: IUserRepository
       const header = req.headers.authorization; // llega como "Bearer <token>"
       if (header === undefined || !header.startsWith(BEARER_PREFIX)) {
         throw new UnauthorizedError('Falta el token de autenticación');
+        
       }
-      const { userId } = tokens.verify(header.slice(BEARER_PREFIX.length)); // lanza 401 si es inválido
+      
+      const { userId } = tokens.verify(header.slice(BEARER_PREFIX.length).trim()); 
+      
+
 
       // Leemos el usuario y sus permisos de la base en cada petición:
       // si un admin le cambia el rol, el cambio rige al instante

@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { AuthController } from './modules/auth/AuthController';
 import { AuthService } from './modules/auth/AuthService';
 import { createAuthRouter } from './modules/auth/auth.routes';
-import { JwtTokenService } from './auth/JwtTokenService';
+import { JwtTokenService } from './modules/auth/JwtTokenService';
 import { env } from './config/env';
 import { DatabaseConnection } from './database/DatabaseConnection';
 
@@ -52,7 +52,7 @@ const userController = new UserController(userService);
 
   const app = createApp({
     auth: createAuthRouter(authController),
-    users: Router(),
+    users: createUserRouter(userController, authenticate), 
     events: Router(),
   });
 

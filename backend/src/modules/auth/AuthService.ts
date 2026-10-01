@@ -62,7 +62,7 @@ export class AuthService {
       throw new Error('El usuario no tiene un rol asignado');
     }
     return {
-      token: this.tokens.sign({ userId: user.id }),
+      token: this.tokens.sign({ userId: user.id, roleId: user.roleId }),
       user: {
         id: user.id,
         name: user.name,
