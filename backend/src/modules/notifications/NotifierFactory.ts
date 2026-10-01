@@ -1,20 +1,24 @@
 import { INotifier } from './INotifier';
+import { ConsoleNotifierAdapter } from './ConsoleNotifierAdapter';
+import { InAppNotifierAdapter } from './InAppNotifierAdapter';
+import { INotificationRepository } from './INotificationRepository';
+import { ISubscriptionRepository } from '../subscriptions/ISubscriptionRepository';
 
 export class NotifierFactory {
+  constructor(
+    private readonly notificationRepo: INotificationRepository,
+    private readonly subscriptionRepo: ISubscriptionRepository
+  ) {}
+
   create(type: 'console' | 'inapp'): INotifier {
     if (type === 'console') {
-      return {
-        send: async (message: string) => {
-          console.log(message);
-        },
-      };
+      return new ConsoleNotifierAdapter();
     }
 
-    // Canal in-app simple que cumple la interfaz
-    return {
-      send: async (message: string) => {
-        // En una etapa posterior acá se puede persistir la notificación
-      },
-    };
+    if (type === 'inapp') {
+      return new InAppNotifierAdapter(this.notificationRepo, this.subscriptionRepo);
+    }
+
+    throw new Error('Notifier type not supported');
   }
 }

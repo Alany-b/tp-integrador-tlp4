@@ -20,6 +20,12 @@ export class EventController {
     res.status(201).json(created);
   };
 
+  update = async (req: Request, res: Response) => {
+    const { title, description } = req.body;
+    const updated = await this.service.update(Number(req.params.id), title, description);
+    res.json(updated);
+  };
+
   changeStatus = async (req: Request, res: Response) => {
     const { status } = req.body;
     const updated = await this.service.changeStatus(Number(req.params.id), status);

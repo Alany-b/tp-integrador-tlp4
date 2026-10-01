@@ -6,7 +6,8 @@ import { errorHandler } from './middlewares/errorHandler';
 export interface AppRouters {
   auth: Router;
   users: Router;
-    events: Router;
+  events: Router;
+  notifications: Router;
 }
 
 export function createApp(routers: AppRouters): Express {
@@ -17,6 +18,7 @@ export function createApp(routers: AppRouters): Express {
   app.use('/api/auth', routers.auth);
   app.use('/api/users', routers.users);
   app.use('/api/events', routers.events);
+  app.use('/api/notifications', routers.notifications);
 
   // Si ninguna ruta coincidió, respondemos 404 con el mismo formato de error
   app.use((_req, res) => {
