@@ -13,6 +13,13 @@ export function errorHandler(
     res.status(err.statusCode).json({ error: err.message });
     return;
   }
+
+    // Si el cliente manda un JSON mal formado, body-parser lanza un SyntaxError: es culpa del cliente, no un 500
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({ error: 'El cuerpo de la petición no es un JSON válido' });
+    return;
+  }
+  
   // Error inesperado: lo registramos en consola y NO exponemos detalles al cliente
   console.error(err);
   res.status(500).json({ error: 'Error interno del servidor' });
