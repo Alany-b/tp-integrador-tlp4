@@ -1,7 +1,7 @@
 .lp {
   --radius: 6px;
   --radius-pill: 999px;
-  --container: 1120px;
+  --container: 1440px;
   --gutter: 24px;
   --section-y: 96px;
   color: var(--color-text);
@@ -11,8 +11,8 @@
 }
 
 .lp *, .lp *::before, .lp *::after { box-sizing: border-box; }
-.lp h1, .lp h2, .lp h3, .lp p, .lp ol, .lp ul { margin: 0; }
-.lp ol, .lp ul { padding: 0; list-style: none; }
+:where(.lp) :is(h1, h2, h3, p, ol, ul) { margin: 0; }
+:where(.lp) :is(ol, ul) { padding: 0; list-style: none; }
 :where(.lp) a { color: var(--color-accent); }
 :where(.lp) a:hover { color: var(--color-accent-dark); }
 .lp :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -138,8 +138,6 @@
 /* Portada */
 .lp-hero { padding: 88px 0 var(--section-y); }
 .lp-hero__inner {
-  max-width: 960px;
-  margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 48px;

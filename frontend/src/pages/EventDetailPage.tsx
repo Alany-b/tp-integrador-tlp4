@@ -10,6 +10,7 @@ import {
 } from "../api/events.api";
 import { ApiError } from "../api/client";
 import { Can } from "../components/Can";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EVENT_STATUSES } from "../types";
 import type { EventDetail, EventStatus } from "../types";
 
@@ -55,6 +56,7 @@ export function EventDetailPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [actionError, setActionError] = useState<string>("");
+  const [confirmingDelete, setConfirmingDelete] = useState<boolean>(false);
 
   async function loadEvent(): Promise<void> {
     if (id === undefined) {
@@ -125,10 +127,7 @@ export function EventDetailPage() {
     if (event === null) {
       return;
     }
-    const confirmed = window.confirm("¿Seguro que querés eliminar este evento?");
-    if (!confirmed) {
-      return;
-    }
+    setConfirmingDelete(false);
     setActionError("");
     try {
       await deleteEvent(event.id);
@@ -260,7 +259,7 @@ export function EventDetailPage() {
                 </Link>
               </Can>
               <Can permission="event:delete">
-                <button className="btn btn--danger" type="button" onClick={handleDelete}>
+                <button className="btn btn--danger" type="button" onClick={() => setConfirmingDelete(true)}>
                   Eliminar
                 </button>
               </Can>
@@ -268,6 +267,14 @@ export function EventDetailPage() {
           </div>
         </article>
       )}
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Eliminar evento"
+        message="Esta acción no se puede deshacer. ¿Seguro que querés eliminar este evento?"
+        confirmLabel="Eliminar"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </main>
   );
 }

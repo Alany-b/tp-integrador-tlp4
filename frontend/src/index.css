@@ -719,3 +719,33 @@ fieldset:disabled .form__textarea {
 
   .card { padding: var(--space-6); }
 }
+
+.dialog {
+  width: min(28rem, calc(100vw - 2rem));
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.dialog::backdrop {
+  background: rgba(32, 30, 29, 0.55);
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.dialog__message {
+  margin: var(--space-3) 0 0;
+  color: var(--color-muted);
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
