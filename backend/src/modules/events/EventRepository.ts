@@ -10,15 +10,16 @@ export class EventRepository implements IEventRepository {
     return Event.findByPk(id);
   }
 
-  async create(data: { title: string; description: string }): Promise<Event> {
+  async create(data: { title: string; description: string; eventDate: Date }): Promise<Event> {
     return Event.create(data);
   }
 
-  async update(id: number, data: { title: string; description: string }): Promise<Event | null> {
+  async update(id: number, data: { title: string; description: string; eventDate: Date }): Promise<Event | null> {
     const event = await this.findById(id);
     if (!event) return null;
     event.title = data.title;
     event.description = data.description;
+    event.eventDate = data.eventDate;
     await event.save();
     return event;
   }

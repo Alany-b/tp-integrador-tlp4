@@ -4,6 +4,12 @@ import { Link, useNavigate, useParams } from "react-router";
 import { createEvent, getEvent, updateEvent } from "../api/events.api";
 import { ApiError } from "../api/client";
 
+function toInputValue(isoDate: string): string {
+  const date = new Date(isoDate);
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+}
+
 function getErrorMessage(caught: unknown): string {
   if (caught instanceof ApiError) {
     return caught.message;
@@ -17,6 +23,7 @@ export function EventFormPage() {
   const isEditing = id !== undefined;
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [eventDate, setEventDate] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(isEditing);
   const [loadError, setLoadError] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -32,6 +39,7 @@ export function EventFormPage() {
       const event = await getEvent(id);
       setTitle(event.title);
       setDescription(event.description);
+      setEventDate(toInputValue(event.eventDate));
     } catch (caught) {
       setLoadError(getErrorMessage(caught));
     } finally {
@@ -55,10 +63,15 @@ export function EventFormPage() {
       return;
     }
 
+    if (eventDate === "") {
+      setError("La fecha y hora del evento es obligatoria.");
+      return;
+    }
+
     setError("");
     setSubmitting(true);
     try {
-      const body = { title: title.trim(), description: description.trim() };
+      const body = { title: title.trim(), description: description.trim(), eventDate: new Date(eventDate).toISOString() };
       if (id === undefined) {
         await createEvent(body);
       } else {
@@ -124,6 +137,20 @@ export function EventFormPage() {
                   required
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
+                />
+              </div>
+              <div className="form__field">
+                <label className="form__label" htmlFor={`${prefix}-event-date`}>
+                  Fecha y hora
+                </label>
+                <input
+                  className="form__input"
+                  id={`${prefix}-event-date`}
+                  name="eventDate"
+                  type="datetime-local"
+                  required
+                  value={eventDate}
+                  onChange={(event) => setEventDate(event.target.value)}
                 />
               </div>
               <div className="form__field">

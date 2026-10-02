@@ -177,6 +177,12 @@ export function EventDetailPage() {
           </div>
           <dl className="event-detail__meta">
             <div>
+              <dt className="event-detail__term">Fecha del evento</dt>
+              <dd className="event-detail__value">
+                <time dateTime={event.eventDate}>{formatDate(event.eventDate)}</time>
+              </dd>
+            </div>
+            <div>
               <dt className="event-detail__term">Creado</dt>
               <dd className="event-detail__value">
                 <time dateTime={event.createdAt}>{formatDate(event.createdAt)}</time>

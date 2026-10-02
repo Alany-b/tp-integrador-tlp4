@@ -106,6 +106,7 @@ export function EventListPage() {
               <tr className="table__row">
                 <th className="table__cell table__cell--head" scope="col">Id</th>
                 <th className="table__cell table__cell--head" scope="col">Título</th>
+                <th className="table__cell table__cell--head" scope="col">Fecha del evento</th>
                 <th className="table__cell table__cell--head" scope="col">Estado</th>
                 <th className="table__cell table__cell--head" scope="col">Actualizado</th>
                 <th className="table__cell table__cell--head" scope="col">
@@ -118,6 +119,9 @@ export function EventListPage() {
                 <tr className="table__row" key={event.id}>
                   <td className="table__cell table__cell--id">#{event.id}</td>
                   <td className="table__cell">{event.title}</td>
+                  <td className="table__cell table__cell--date">
+                    <time dateTime={event.eventDate}>{formatDate(event.eventDate)}</time>
+                  </td>
                   <td className="table__cell">
                     <span className={getBadgeClassName(event.status)}>{event.status}</span>
                   </td>

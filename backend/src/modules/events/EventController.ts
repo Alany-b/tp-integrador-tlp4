@@ -15,14 +15,14 @@ export class EventController {
   };
 
   create = async (req: Request, res: Response) => {
-    const { title, description } = req.body;
-    const created = await this.service.create(title, description);
+    const { title, description, eventDate } = req.body;
+    const created = await this.service.create(title, description, eventDate);
     res.status(201).json(created);
   };
 
   update = async (req: Request, res: Response) => {
-    const { title, description } = req.body;
-    const updated = await this.service.update(Number(req.params.id), title, description);
+    const { title, description, eventDate } = req.body;
+    const updated = await this.service.update(Number(req.params.id), title, description, eventDate);
     res.json(updated);
   };
 

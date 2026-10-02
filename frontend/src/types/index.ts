@@ -37,6 +37,7 @@ export interface Event {
   id: Id;
   title: string;
   description: string;
+  eventDate: string;
   status: EventStatus;
   createdAt: string;
   updatedAt: string;
@@ -75,6 +76,7 @@ export interface RegisterBody {
 export interface EventBody {
   title: string;
   description: string;
+  eventDate: string;
 }
 
 export interface EventStatusBody {

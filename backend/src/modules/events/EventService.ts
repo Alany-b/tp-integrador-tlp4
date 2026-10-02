@@ -1,5 +1,6 @@
 import { IEventRepository } from './IEventRepository';
 import { EventPublisher } from '../../observer/EventPublisher';
+import { ValidationError } from '../../middlewares/AppError';
 
 export class EventService {
   constructor(
@@ -17,12 +18,20 @@ export class EventService {
     return event;
   }
 
-  async create(title: string, description: string) {
-    return this.eventRepo.create({ title, description });
+  private parseDate(value: unknown): Date {
+    const date = new Date(String(value));
+    if (value === undefined || value === null || value === '' || Number.isNaN(date.getTime())) {
+      throw new ValidationError('La fecha y hora del evento es obligatoria y debe ser válida');
+    }
+    return date;
   }
 
-  async update(id: number, title: string, description: string) {
-    const updated = await this.eventRepo.update(id, { title, description });
+  async create(title: string, description: string, eventDate: unknown) {
+    return this.eventRepo.create({ title, description, eventDate: this.parseDate(eventDate) });
+  }
+
+  async update(id: number, title: string, description: string, eventDate: unknown) {
+    const updated = await this.eventRepo.update(id, { title, description, eventDate: this.parseDate(eventDate) });
     if (!updated) throw new Error('Evento no encontrado');
     return updated;
   }
