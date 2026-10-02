@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
-import { ApiError } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errors";
 
 export function LoginPage() {
   const { user, login } = useAuth();
@@ -34,11 +34,7 @@ export function LoginPage() {
       await login(email.trim(), password);
       navigate("/events");
     } catch (caught) {
-      if (caught instanceof ApiError) {
-        setError(caught.message);
-      } else {
-        setError("Ocurrió un error inesperado.");
-      }
+      setError(getErrorMessage(caught));
     } finally {
       setSubmitting(false);
     }

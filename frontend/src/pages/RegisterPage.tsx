@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { register } from "../api/auth.api";
-import { ApiError } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errors";
 
 export function RegisterPage() {
   const { user } = useAuth();
@@ -40,11 +40,7 @@ export function RegisterPage() {
       await register({ name: name.trim(), email: email.trim(), password });
       navigate("/login");
     } catch (caught) {
-      if (caught instanceof ApiError) {
-        setError(caught.message);
-      } else {
-        setError("Ocurrió un error inesperado.");
-      }
+      setError(getErrorMessage(caught));
     } finally {
       setSubmitting(false);
     }

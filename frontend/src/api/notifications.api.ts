@@ -1,10 +1,13 @@
-import { request } from "./client";
+import { apiClient } from "./client";
+import { Subject } from "../observer/Subject";
 import type { Id, Notification } from "../types";
 
+export const notificationsChanged = new Subject<void>();
+
 export async function listNotifications(): Promise<Notification[]> {
-  return request<Notification[]>("GET", "/notifications");
+  return apiClient.request<Notification[]>("GET", "/notifications");
 }
 
-export async function markNotificationAsRead(id: Id): Promise<Notification> {
-  return request<Notification>("PATCH", `/notifications/${id}/read`);
+export async function markNotificationAsRead(id: Id): Promise<void> {
+  return apiClient.request<void>("PATCH", `/notifications/${id}/read`);
 }

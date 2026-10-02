@@ -1,28 +1,9 @@
 import { useEffect, useState } from "react";
-import { listNotifications, markNotificationAsRead } from "../api/notifications.api";
-import { ApiError } from "../api/client";
+import { listNotifications, markNotificationAsRead, notificationsChanged } from "../api/notifications.api";
 import type { Id, Notification } from "../types";
-
-function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  return date
-    .toLocaleString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
-    .replace(",", "");
-}
-
-function getErrorMessage(caught: unknown): string {
-  if (caught instanceof ApiError) {
-    return caught.message;
-  }
-  return "Ocurrió un error inesperado.";
-}
+import { formatDate } from "../utils/format";
+import { getErrorMessage } from "../utils/errors";
+import { StateMessage } from "../components/StateMessage";
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -56,7 +37,7 @@ export function NotificationsPage() {
           notification.id === id ? { ...notification, read: true } : notification,
         ),
       );
-      window.dispatchEvent(new Event("notifications-updated"));
+      notificationsChanged.notify();
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
@@ -68,7 +49,7 @@ export function NotificationsPage() {
     try {
       await Promise.all(unread.map((notification) => markNotificationAsRead(notification.id)));
       setNotifications(notifications.map((notification) => ({ ...notification, read: true })));
-      window.dispatchEvent(new Event("notifications-updated"));
+      notificationsChanged.notify();
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
@@ -94,30 +75,15 @@ export function NotificationsPage() {
       )}
 
       {loading && (
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando notificaciones</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando notificaciones" />
       )}
 
       {!loading && error !== "" && (
-        <div className="state state--error" role="alert">
-          <p className="state__title">No se pudieron cargar las notificaciones</p>
-          <p className="state__text">{error}</p>
-          <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadNotifications}>
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <StateMessage variant="error" title="No se pudieron cargar las notificaciones" text={error} onRetry={loadNotifications} />
       )}
 
       {!loading && error === "" && notifications.length === 0 && (
-        <div className="state state--empty" role="status">
-          <p className="state__title">Todavía no hay notificaciones</p>
-          <p className="state__text">Cuando cambie el estado de un evento suscripto, aparecerá en este listado.</p>
-        </div>
+        <StateMessage variant="empty" title="Todavía no hay notificaciones" text="Cuando cambie el estado de un evento suscripto, aparecerá en este listado." />
       )}
 
       {!loading && error === "" && notifications.length > 0 && (

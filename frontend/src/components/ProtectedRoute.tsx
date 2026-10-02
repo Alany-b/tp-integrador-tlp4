@@ -1,6 +1,7 @@
 import { Link, Navigate, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import type { Permission } from "../types";
+import { StateMessage } from "./StateMessage";
 
 interface ProtectedRouteProps {
   permission?: Permission;
@@ -12,11 +13,7 @@ export function ProtectedRoute({ permission }: ProtectedRouteProps) {
   if (loading) {
     return (
       <main className="page">
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando" />
       </main>
     );
   }
@@ -28,13 +25,9 @@ export function ProtectedRoute({ permission }: ProtectedRouteProps) {
   if (permission !== undefined && !hasPermission(permission)) {
     return (
       <main className="page">
-        <div className="state state--denied" role="alert">
-          <p className="state__title">Acceso denegado</p>
-          <p className="state__text">No tenés permisos para ver esta sección.</p>
-          <div className="state__actions">
-            <Link className="btn btn--secondary btn--small" to="/events">Volver a eventos</Link>
-          </div>
-        </div>
+        <StateMessage variant="denied" title="Acceso denegado" text="No tenés permisos para ver esta sección.">
+          <Link className="btn btn--secondary btn--small" to="/events">Volver a eventos</Link>
+        </StateMessage>
       </main>
     );
   }

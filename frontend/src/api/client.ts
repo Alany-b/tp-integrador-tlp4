@@ -1,36 +1,18 @@
-const envUrl: unknown = import.meta.env.VITE_API_URL;
+import { ApiErrorFactory, UnauthorizedError } from "./errors";
+import { session } from "./storage";
+import type { ISessionStorage } from "./storage";
+import { Subject } from "../observer/Subject";
 
-const API_URL: string = typeof envUrl === "string" && envUrl !== "" ? envUrl : "http://localhost:3000/api";
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-const TOKEN_KEY = "token";
-const USER_KEY = "user";
+const DEFAULT_API_URL = "http://localhost:3000/api";
 
-export class ApiError extends Error {
-  status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
+function readApiUrl(): string {
+  const envUrl: unknown = import.meta.env.VITE_API_URL;
+  if (typeof envUrl === "string" && envUrl !== "") {
+    return envUrl;
   }
-}
-
-let unauthorizedHandler: (() => void) | null = null;
-
-export function setUnauthorizedHandler(handler: () => void): void {
-  unauthorizedHandler = handler;
-}
-
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function removeToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
+  return DEFAULT_API_URL;
 }
 
 function extractMessage(data: unknown): string | null {
@@ -43,22 +25,6 @@ function extractMessage(data: unknown): string | null {
   return null;
 }
 
-function defaultMessage(status: number): string {
-  if (status === 401) {
-    return "Sesión expirada o credenciales inválidas";
-  }
-  if (status === 403) {
-    return "No tiene permiso para realizar esta acción";
-  }
-  if (status === 404) {
-    return "El recurso solicitado no existe";
-  }
-  if (status >= 500) {
-    return "Error interno del servidor, intente nuevamente más tarde";
-  }
-  return "Error inesperado al procesar la solicitud";
-}
-
 async function readJson(response: Response): Promise<unknown> {
   try {
     return await response.json();
@@ -67,44 +33,63 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-export async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = {};
-  const token = getToken();
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-  if (body !== undefined) {
-    headers["Content-Type"] = "application/json";
+export class ApiClient {
+  private static instance: ApiClient | null = null;
+
+  readonly unauthorized = new Subject<void>();
+  private readonly baseUrl: string;
+  private readonly storage: ISessionStorage;
+
+  private constructor(baseUrl: string, storage: ISessionStorage) {
+    this.baseUrl = baseUrl;
+    this.storage = storage;
   }
 
-  let response: Response;
-  try {
-    response = await fetch(`${API_URL}${path}`, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-  } catch {
-    throw new ApiError(0, "No se pudo conectar con el servidor");
-  }
-
-  if (!response.ok) {
-    const data = await readJson(response);
-    const message = extractMessage(data) ?? defaultMessage(response.status);
-    if (response.status === 401) {
-      removeToken();
-      localStorage.removeItem(USER_KEY);
-      if (unauthorizedHandler) {
-        unauthorizedHandler();
-      }
+  static getInstance(): ApiClient {
+    if (ApiClient.instance === null) {
+      ApiClient.instance = new ApiClient(readApiUrl(), session);
     }
-    throw new ApiError(response.status, message);
+    return ApiClient.instance;
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
+  async request<T>(method: HttpMethod, path: string, body?: unknown): Promise<T> {
+    const headers: Record<string, string> = {};
+    const token = this.storage.getToken();
+    if (token !== null) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (body !== undefined) {
+      headers["Content-Type"] = "application/json";
+    }
 
-  const data = await readJson(response);
-  return data as T;
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      throw ApiErrorFactory.network();
+    }
+
+    if (!response.ok) {
+      const data = await readJson(response);
+      const error = ApiErrorFactory.fromResponse(response.status, extractMessage(data));
+      if (error instanceof UnauthorizedError) {
+        this.storage.clear();
+        this.unauthorized.notify();
+      }
+      throw error;
+    }
+
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    const data = await readJson(response);
+    return data as T;
+  }
 }
+
+export const apiClient = ApiClient.getInstance();

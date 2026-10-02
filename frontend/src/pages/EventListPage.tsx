@@ -1,36 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { listEvents } from "../api/events.api";
-import { ApiError } from "../api/client";
 import { Can } from "../components/Can";
-import type { Event, EventStatus } from "../types";
-
-function getBadgeClassName(status: EventStatus): string {
-  if (status === "PROGRAMADO") {
-    return "badge badge--programado";
-  }
-  if (status === "REPROGRAMADO") {
-    return "badge badge--reprogramado";
-  }
-  if (status === "FINALIZADO") {
-    return "badge badge--finalizado";
-  }
-  return "badge badge--cancelado";
-}
-
-function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  return date
-    .toLocaleString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
-    .replace(",", "");
-}
+import type { Event } from "../types";
+import { StatusBadge } from "../components/StatusBadge";
+import { formatDate } from "../utils/format";
+import { getErrorMessage } from "../utils/errors";
+import { StateMessage } from "../components/StateMessage";
 
 export function EventListPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -44,11 +20,7 @@ export function EventListPage() {
       const data = await listEvents();
       setEvents(data);
     } catch (caught) {
-      if (caught instanceof ApiError) {
-        setError(caught.message);
-      } else {
-        setError("Ocurrió un error inesperado.");
-      }
+      setError(getErrorMessage(caught));
     } finally {
       setLoading(false);
     }
@@ -72,30 +44,15 @@ export function EventListPage() {
       </header>
 
       {loading && (
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando eventos</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando eventos" />
       )}
 
       {!loading && error !== "" && (
-        <div className="state state--error" role="alert">
-          <p className="state__title">No se pudieron cargar los eventos</p>
-          <p className="state__text">{error}</p>
-          <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvents}>
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <StateMessage variant="error" title="No se pudieron cargar los eventos" text={error} onRetry={loadEvents} />
       )}
 
       {!loading && error === "" && events.length === 0 && (
-        <div className="state state--empty" role="status">
-          <p className="state__title">Todavía no hay eventos</p>
-          <p className="state__text">Cuando se cree un evento, aparecerá en este listado.</p>
-        </div>
+        <StateMessage variant="empty" title="Todavía no hay eventos" text="Cuando se cree un evento, aparecerá en este listado." />
       )}
 
       {!loading && error === "" && events.length > 0 && (
@@ -123,7 +80,7 @@ export function EventListPage() {
                     <time dateTime={event.eventDate}>{formatDate(event.eventDate)}</time>
                   </td>
                   <td className="table__cell">
-                    <span className={getBadgeClassName(event.status)}>{event.status}</span>
+                    <StatusBadge status={event.status} />
                   </td>
                   <td className="table__cell table__cell--date">
                     <time dateTime={event.updatedAt}>{formatDate(event.updatedAt)}</time>

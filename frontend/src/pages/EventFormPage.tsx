@@ -2,19 +2,13 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { createEvent, getEvent, updateEvent } from "../api/events.api";
-import { ApiError } from "../api/client";
+import { getErrorMessage } from "../utils/errors";
+import { StateMessage } from "../components/StateMessage";
 
 function toInputValue(isoDate: string): string {
   const date = new Date(isoDate);
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-}
-
-function getErrorMessage(caught: unknown): string {
-  if (caught instanceof ApiError) {
-    return caught.message;
-  }
-  return "Ocurrió un error inesperado.";
 }
 
 export function EventFormPage() {
@@ -95,23 +89,11 @@ export function EventFormPage() {
       </header>
 
       {loading && (
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando evento</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando evento" />
       )}
 
       {!loading && loadError !== "" && (
-        <div className="state state--error" role="alert">
-          <p className="state__title">No se pudo cargar el evento</p>
-          <p className="state__text">{loadError}</p>
-          <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvent}>
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <StateMessage variant="error" title="No se pudo cargar el evento" text={loadError} onRetry={loadEvent} />
       )}
 
       {!loading && loadError === "" && (

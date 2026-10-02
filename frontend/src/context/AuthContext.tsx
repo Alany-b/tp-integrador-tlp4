@@ -1,15 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { getToken, removeToken, setToken, setUnauthorizedHandler } from "../api/client";
+import { apiClient } from "../api/client";
+import { session } from "../api/storage";
 import { login as loginRequest } from "../api/auth.api";
 import { ROLES } from "../types";
 import type { Permission, User } from "../types";
 
-const USER_KEY = "user";
-
 interface AuthContextValue {
   user: User | null;
-  token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -45,7 +43,7 @@ function isUser(value: unknown): value is User {
 }
 
 function readStoredUser(): User | null {
-  const raw = localStorage.getItem(USER_KEY);
+  const raw = session.getUser();
   if (raw === null) {
     return null;
   }
@@ -66,41 +64,34 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const storedToken = getToken();
+    const storedToken = session.getToken();
     const storedUser = readStoredUser();
     if (storedToken !== null && storedUser !== null) {
-      setTokenState(storedToken);
       setUser(storedUser);
     } else {
-      removeToken();
-      localStorage.removeItem(USER_KEY);
+      session.clear();
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    setUnauthorizedHandler(() => {
-      setTokenState(null);
+    function handleUnauthorized(): void {
       setUser(null);
-    });
+    }
+    return apiClient.unauthorized.subscribe(handleUnauthorized);
   }, []);
 
   async function login(email: string, password: string): Promise<void> {
     const response = await loginRequest({ email, password });
-    setToken(response.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(response.user));
-    setTokenState(response.token);
+    session.save(response.token, JSON.stringify(response.user));
     setUser(response.user);
   }
 
   function logout(): void {
-    removeToken();
-    localStorage.removeItem(USER_KEY);
-    setTokenState(null);
+    session.clear();
     setUser(null);
   }
 
@@ -111,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return user.permissions.includes(permission);
   }
 
-  const value: AuthContextValue = { user, token, loading, login, logout, hasPermission };
+  const value: AuthContextValue = { user, loading, login, logout, hasPermission };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

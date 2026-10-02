@@ -56,7 +56,7 @@ export interface Subscription {
 
 export interface Notification {
   id: Id;
-  eventId: Id;
+  userId: Id;
   message: string;
   read: boolean;
   createdAt: string;

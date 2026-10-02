@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { assignUserRole, listUsers } from "../api/users.api";
-import { ApiError } from "../api/client";
 import { Can } from "../components/Can";
 import { ROLES } from "../types";
 import type { Role, User } from "../types";
-
-function getErrorMessage(caught: unknown): string {
-  if (caught instanceof ApiError) {
-    return caught.message;
-  }
-  return "Ocurrió un error inesperado.";
-}
+import { getErrorMessage } from "../utils/errors";
+import { StateMessage } from "../components/StateMessage";
 
 export function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -66,30 +60,15 @@ export function AdminUsersPage() {
       )}
 
       {loading && (
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando usuarios</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando usuarios" />
       )}
 
       {!loading && error !== "" && (
-        <div className="state state--error" role="alert">
-          <p className="state__title">No se pudieron cargar los usuarios</p>
-          <p className="state__text">{error}</p>
-          <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadUsers}>
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <StateMessage variant="error" title="No se pudieron cargar los usuarios" text={error} onRetry={loadUsers} />
       )}
 
       {!loading && error === "" && users.length === 0 && (
-        <div className="state state--empty" role="status">
-          <p className="state__title">Todavía no hay usuarios</p>
-          <p className="state__text">Cuando se registre un usuario, aparecerá en este listado.</p>
-        </div>
+        <StateMessage variant="empty" title="Todavía no hay usuarios" text="Cuando se registre un usuario, aparecerá en este listado." />
       )}
 
       {!loading && error === "" && users.length > 0 && (

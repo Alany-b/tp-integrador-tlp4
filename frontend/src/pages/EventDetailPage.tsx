@@ -1,58 +1,20 @@
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import {
-  changeEventStatus,
-  deleteEvent,
-  getEvent,
-  subscribeToEvent,
-  unsubscribeFromEvent,
-} from "../api/events.api";
-import { ApiError } from "../api/client";
+import { deleteEvent, getEvent } from "../api/events.api";
 import { Can } from "../components/Can";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { EVENT_STATUSES } from "../types";
-import type { EventDetail, EventStatus } from "../types";
-
-function getBadgeClassName(status: EventStatus): string {
-  if (status === "PROGRAMADO") {
-    return "badge badge--programado";
-  }
-  if (status === "REPROGRAMADO") {
-    return "badge badge--reprogramado";
-  }
-  if (status === "FINALIZADO") {
-    return "badge badge--finalizado";
-  }
-  return "badge badge--cancelado";
-}
-
-function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  return date
-    .toLocaleString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
-    .replace(",", "");
-}
-
-function getErrorMessage(caught: unknown): string {
-  if (caught instanceof ApiError) {
-    return caught.message;
-  }
-  return "Ocurrió un error inesperado.";
-}
+import type { Event, EventDetail } from "../types";
+import { StatusBadge } from "../components/StatusBadge";
+import { StatusChanger } from "../components/StatusChanger";
+import { SubscriptionButton } from "../components/SubscriptionButton";
+import { formatDate } from "../utils/format";
+import { getErrorMessage } from "../utils/errors";
+import { StateMessage } from "../components/StateMessage";
 
 export function EventDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState<EventDetail | null>(null);
-  const [statusSelection, setStatusSelection] = useState<EventStatus>("PROGRAMADO");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [actionError, setActionError] = useState<string>("");
@@ -69,7 +31,6 @@ export function EventDetailPage() {
     try {
       const data = await getEvent(id);
       setEvent(data);
-      setStatusSelection(data.status);
     } catch (caught) {
       setError(getErrorMessage(caught));
     } finally {
@@ -81,45 +42,15 @@ export function EventDetailPage() {
     loadEvent();
   }, [id]);
 
-  async function handleSubscribe(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
-    submitEvent.preventDefault();
-    if (event === null) {
-      return;
-    }
-    setActionError("");
-    try {
-      await subscribeToEvent(event.id);
-      setEvent({ ...event, isSubscribed: true });
-    } catch (caught) {
-      setActionError(getErrorMessage(caught));
+  function handleSubscriptionChange(isSubscribed: boolean): void {
+    if (event !== null) {
+      setEvent({ ...event, isSubscribed });
     }
   }
 
-  async function handleUnsubscribe(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
-    submitEvent.preventDefault();
-    if (event === null) {
-      return;
-    }
-    setActionError("");
-    try {
-      await unsubscribeFromEvent(event.id);
-      setEvent({ ...event, isSubscribed: false });
-    } catch (caught) {
-      setActionError(getErrorMessage(caught));
-    }
-  }
-
-  async function handleChangeStatus(submitEvent: FormEvent<HTMLFormElement>): Promise<void> {
-    submitEvent.preventDefault();
-    if (event === null) {
-      return;
-    }
-    setActionError("");
-    try {
-      const updated = await changeEventStatus(event.id, { status: statusSelection });
+  function handleStatusChange(updated: Event): void {
+    if (event !== null) {
       setEvent({ ...event, status: updated.status, updatedAt: updated.updatedAt });
-    } catch (caught) {
-      setActionError(getErrorMessage(caught));
     }
   }
 
@@ -149,30 +80,18 @@ export function EventDetailPage() {
       </header>
 
       {loading && (
-        <div className="state state--loading" role="status">
-          <div className="state__spinner"></div>
-          <p className="state__title">Cargando evento</p>
-          <p className="state__text">Esto puede demorar unos segundos.</p>
-        </div>
+        <StateMessage variant="loading" title="Cargando evento" />
       )}
 
       {!loading && error !== "" && (
-        <div className="state state--error" role="alert">
-          <p className="state__title">No se pudo cargar el evento</p>
-          <p className="state__text">{error}</p>
-          <div className="state__actions">
-            <button className="btn btn--secondary btn--small" type="button" onClick={loadEvent}>
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <StateMessage variant="error" title="No se pudo cargar el evento" text={error} onRetry={loadEvent} />
       )}
 
       {!loading && error === "" && event !== null && (
         <article className="card event-detail">
           <div className="event-detail__header">
             <h2>{event.title}</h2>
-            <span className={getBadgeClassName(event.status)}>{event.status}</span>
+            <StatusBadge status={event.status} />
           </div>
           <dl className="event-detail__meta">
             <div>
@@ -202,56 +121,19 @@ export function EventDetailPage() {
           )}
           <div className="event-detail__actions">
             <div className="event-detail__group">
-              {!event.isSubscribed && (
-                <Can permission="subscription:create">
-                  <form onSubmit={handleSubscribe}>
-                    <button className="btn btn--primary" type="submit">
-                      Suscribirse
-                    </button>
-                  </form>
-                </Can>
-              )}
-              {event.isSubscribed && (
-                <Can permission="subscription:delete">
-                  <form onSubmit={handleUnsubscribe}>
-                    <button className="btn btn--secondary" type="submit">
-                      Desuscribirse
-                    </button>
-                  </form>
-                </Can>
-              )}
+              <SubscriptionButton
+                eventId={event.id}
+                isSubscribed={event.isSubscribed}
+                onChange={handleSubscriptionChange}
+                onError={setActionError}
+              />
             </div>
-            <Can permission="event:change-status">
-              <form className="event-detail__group" onSubmit={handleChangeStatus}>
-                <fieldset className="event-detail__group">
-                  <legend className="visually-hidden">Cambiar estado</legend>
-                  <label className="form__label" htmlFor="event-status">
-                    Estado
-                  </label>
-                  <select
-                    className="form__select form__select--inline"
-                    id="event-status"
-                    name="status"
-                    value={statusSelection}
-                    onChange={(event) => {
-                      const selected = EVENT_STATUSES.find((status) => status === event.target.value);
-                      if (selected !== undefined) {
-                        setStatusSelection(selected);
-                      }
-                    }}
-                  >
-                    {EVENT_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                  <button className="btn btn--secondary" type="submit">
-                    Aplicar estado
-                  </button>
-                </fieldset>
-              </form>
-            </Can>
+            <StatusChanger
+              eventId={event.id}
+              currentStatus={event.status}
+              onChange={handleStatusChange}
+              onError={setActionError}
+            />
             <div className="event-detail__group">
               <Can permission="event:update">
                 <Link className="btn btn--secondary" to={`/events/${event.id}/edit`}>
