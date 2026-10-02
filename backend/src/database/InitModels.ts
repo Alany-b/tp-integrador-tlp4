@@ -4,6 +4,7 @@ import { Role, initRoleModel } from '../modules/roles/Role';
 import { User, initUserModel } from '../modules/users/User';
 import { initEventModel, Event } from '../modules/events/Event';
 import { initSubscriptionModel, Subscription } from '../modules/subscriptions/Subscription';
+import { initNotificationModel } from '../modules/notifications/Notification';
 
 export function initModels(sequelize: Sequelize): void {
   // 1) Primero se inicializan todos los modelos con la instancia única de Sequelize
@@ -12,6 +13,7 @@ export function initModels(sequelize: Sequelize): void {
   initUserModel(sequelize);
   initEventModel(sequelize);
   initSubscriptionModel(sequelize);
+  initNotificationModel(sequelize);
 
   // 2) Después se declaran las asociaciones
   // Rol <-> Permiso: muchos a muchos, con la tabla intermedia role_permissions

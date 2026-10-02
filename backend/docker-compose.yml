@@ -11,5 +11,22 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  backend:
+    build: .
+    container_name: backend
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: tlp4
+      DB_PASSWORD: tlp4
+      DB_NAME: tp_integrador
+      JWT_SECRET: cambiar_este_secreto_local
+      API_PORT: 3000
+    ports:
+      - "3000:3000"
+    restart: on-failure
+
 volumes:
   pgdata:

@@ -53,7 +53,7 @@ export function RegisterPage() {
   return (
     <main className="auth">
       <section className="auth__card">
-        <span className="auth__brand">Mesa de Ayuda</span>
+        <span className="auth__brand">Gestor de Eventos</span>
         <h1 className="auth__title">Crear cuenta</h1>
         <form className="form" onSubmit={handleSubmit}>
           {error !== "" && (

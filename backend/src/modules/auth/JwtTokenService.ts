@@ -13,8 +13,6 @@ export class JwtTokenService implements ITokenService {
   }
 
   verify(token: string): TokenPayload {
-    console.log("Token exacto:", token);
-    console.log("Mi secret es:", this.secret);
     let decoded: any;
     try {
       decoded = jwt.verify(token, this.secret); // lanza si la firma es falsa o el token venció

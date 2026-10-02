@@ -23,7 +23,7 @@ export function Navbar() {
 
   return (
     <nav className="navbar" aria-label="Principal">
-      <Link className="navbar__brand" to="/events">Mesa de Ayuda</Link>
+      <Link className="navbar__brand" to="/">Gestor de Eventos</Link>
       <div className="navbar__links">
         <NavLink className={getLinkClassName} to="/events">Eventos</NavLink>
         <Can permission="user:read">
