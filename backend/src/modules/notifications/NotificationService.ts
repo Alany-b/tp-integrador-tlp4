@@ -1,9 +1,6 @@
 import { IObserver } from '../../observer/IObserver';
 import { EventStatusChangedPayload } from '../../observer/EventStatusChangedPayload';
-
-export interface NotifierFactory {
-  create(channel: string): { send(message: string): Promise<void> };
-}
+import { NotifierFactory } from './NotifierFactory';
 
 export class NotificationService implements IObserver {
   constructor(private readonly factory: NotifierFactory) {}
@@ -13,10 +10,10 @@ export class NotificationService implements IObserver {
 
     // 1. Canal consola vía Adapter
     const consoleNotifier = this.factory.create('console');
-    await consoleNotifier.send(message);
+    await consoleNotifier.send(message, payload.eventId);
 
     // 2. Canal in-app para la base de datos
     const inAppNotifier = this.factory.create('inapp');
-    await inAppNotifier.send(message);
+    await inAppNotifier.send(message, payload.eventId);
   }
 }

@@ -1,3 +1,3 @@
 export interface INotifier {
-  send(message: string): Promise<void>;
+  send(message: string, eventId?: number): Promise<void>;
 }

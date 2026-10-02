@@ -21,6 +21,12 @@ export class EventService {
     return this.eventRepo.create({ title, description });
   }
 
+  async update(id: number, title: string, description: string) {
+    const updated = await this.eventRepo.update(id, { title, description });
+    if (!updated) throw new Error('Evento no encontrado');
+    return updated;
+  }
+
   async changeStatus(id: number, newStatus: string) {
     const validStatuses = ['PROGRAMADO', 'REPROGRAMADO', 'CANCELADO', 'FINALIZADO'];
     if (!validStatuses.includes(newStatus)) {

@@ -14,6 +14,15 @@ export class EventRepository implements IEventRepository {
     return Event.create(data);
   }
 
+  async update(id: number, data: { title: string; description: string }): Promise<Event | null> {
+    const event = await this.findById(id);
+    if (!event) return null;
+    event.title = data.title;
+    event.description = data.description;
+    await event.save();
+    return event;
+  }
+
   async updateStatus(id: number, status: string): Promise<Event | null> {
     const event = await this.findById(id);
     if (!event) return null;
