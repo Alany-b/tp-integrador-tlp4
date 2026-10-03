@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { apiClient } from "../api/client";
-import { session } from "../api/storage";
+import { apiClient, clearSession, getStoredUser, getToken, saveSession } from "../api/client";
 import { login as loginRequest } from "../api/auth.api";
 import { ROLES } from "../types";
 import type { Permission, User } from "../types";
@@ -43,7 +42,7 @@ function isUser(value: unknown): value is User {
 }
 
 function readStoredUser(): User | null {
-  const raw = session.getUser();
+  const raw = getStoredUser();
   if (raw === null) {
     return null;
   }
@@ -67,12 +66,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const storedToken = session.getToken();
+    const storedToken = getToken();
     const storedUser = readStoredUser();
     if (storedToken !== null && storedUser !== null) {
       setUser(storedUser);
     } else {
-      session.clear();
+      clearSession();
     }
     setLoading(false);
   }, []);
@@ -81,17 +80,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     function handleUnauthorized(): void {
       setUser(null);
     }
-    return apiClient.unauthorized.subscribe(handleUnauthorized);
+    return apiClient.onUnauthorized(handleUnauthorized);
   }, []);
 
   async function login(email: string, password: string): Promise<void> {
     const response = await loginRequest({ email, password });
-    session.save(response.token, JSON.stringify(response.user));
+    saveSession(response.token, JSON.stringify(response.user));
     setUser(response.user);
   }
 
   function logout(): void {
-    session.clear();
+    clearSession();
     setUser(null);
   }
 

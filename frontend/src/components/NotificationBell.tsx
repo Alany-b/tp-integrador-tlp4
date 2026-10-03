@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { listNotifications, notificationsChanged } from "../api/notifications.api";
+import { listNotifications, onNotificationsChanged } from "../api/notifications.api";
 import { useAuth } from "../context/AuthContext";
 
 const POLLING_INTERVAL_MS = 10000;
@@ -32,7 +32,7 @@ export function NotificationBell() {
 
     loadUnreadCount();
     const intervalId = setInterval(loadUnreadCount, POLLING_INTERVAL_MS);
-    const unsubscribe = notificationsChanged.subscribe(loadUnreadCount);
+    const unsubscribe = onNotificationsChanged(loadUnreadCount);
 
     return () => {
       active = false;

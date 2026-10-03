@@ -5,6 +5,8 @@ import { register } from "../api/auth.api";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../utils/errors";
 
+const MIN_PASSWORD_LENGTH = 6;
+
 export function RegisterPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,8 +31,8 @@ export function RegisterPage() {
       setError("Ingresá un correo electrónico válido.");
       return;
     }
-    if (password === "") {
-      setError("Ingresá la contraseña.");
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`);
       return;
     }
 
@@ -100,6 +102,7 @@ export function RegisterPage() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
+                minLength={MIN_PASSWORD_LENGTH}
                 required
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

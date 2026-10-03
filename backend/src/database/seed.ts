@@ -8,6 +8,7 @@ import { IUserRepository } from '../modules/users/IUserRepository';
 // Usuarios de prueba que exige la consigna (van también en el README)
 const TEST_USERS: ReadonlyArray<{ name: string; email: string; password: string; role: RoleName }> = [
   { name: 'Administrador', email: 'admin@tp.com', password: 'admin123', role: ROLES.ADMIN },
+  { name: 'Administrador 2', email: 'admin2@tp.com', password: 'admin2123', role: ROLES.ADMIN },
   { name: 'Operador', email: 'operador@tp.com', password: 'operador123', role: ROLES.OPERADOR },
   { name: 'Usuario', email: 'usuario@tp.com', password: 'usuario123', role: ROLES.USUARIO },
 ];

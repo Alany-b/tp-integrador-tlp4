@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { EventDetailPage } from "./pages/EventDetailPage";
@@ -32,6 +33,7 @@ function App() {
         <Route element={<ProtectedRoute permission="user:read" />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

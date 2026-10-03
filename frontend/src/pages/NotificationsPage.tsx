@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listNotifications, markNotificationAsRead, notificationsChanged } from "../api/notifications.api";
+import { listNotifications, markAllNotificationsAsRead, markNotificationAsRead } from "../api/notifications.api";
 import type { Id, Notification } from "../types";
 import { formatDate } from "../utils/format";
 import { getErrorMessage } from "../utils/errors";
@@ -37,7 +37,6 @@ export function NotificationsPage() {
           notification.id === id ? { ...notification, read: true } : notification,
         ),
       );
-      notificationsChanged.notify();
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }
@@ -47,9 +46,8 @@ export function NotificationsPage() {
     setActionError("");
     const unread = notifications.filter((notification) => !notification.read);
     try {
-      await Promise.all(unread.map((notification) => markNotificationAsRead(notification.id)));
+      await markAllNotificationsAsRead(unread.map((notification) => notification.id));
       setNotifications(notifications.map((notification) => ({ ...notification, read: true })));
-      notificationsChanged.notify();
     } catch (caught) {
       setActionError(getErrorMessage(caught));
     }

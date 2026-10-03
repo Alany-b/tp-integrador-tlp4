@@ -21,7 +21,7 @@ export const EVENT_STATUSES: EventStatus[] = ["PROGRAMADO", "REPROGRAMADO", "CAN
 export const ROLES: Role[] = ["admin", "operador", "usuario"];
 
 export interface User {
-  id: Id;
+  readonly id: Id;
   name: string;
   email: string;
   role: Role;
@@ -34,7 +34,7 @@ export interface AuthResponse {
 }
 
 export interface Event {
-  id: Id;
+  readonly id: Id;
   title: string;
   description: string;
   eventDate: string;
@@ -48,14 +48,14 @@ export interface EventDetail extends Event {
 }
 
 export interface Subscription {
-  id: Id;
+  readonly id: Id;
   userId: Id;
   eventId: Id;
   createdAt: string;
 }
 
 export interface Notification {
-  id: Id;
+  readonly id: Id;
   userId: Id;
   message: string;
   read: boolean;
